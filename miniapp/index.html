@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PvP Stars Mini App</title>
+  <style>
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background:#0b1220;
+      color:#fff;
+      padding:18px;
+    }
+    .card{
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:16px;
+      padding:16px;
+      margin-bottom:14px;
+    }
+    .btn{
+      width:100%;
+      padding:14px 16px;
+      border-radius:14px;
+      border:0;
+      background:#2f81f7;
+      color:#fff;
+      font-size:16px;
+      font-weight:700;
+      margin-top:10px;
+    }
+    .btn:active{ transform:scale(0.99); }
+    .muted{ opacity:0.8; font-size:13px; }
+    .row{ display:flex; gap:10px; }
+    .row .btn{ width:50%; }
+    input{
+      width:100%;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.15);
+      background:rgba(0,0,0,0.25);
+      color:#fff;
+      outline:none;
+      font-size:15px;
+      margin-top:10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h2 style="margin:0 0 6px 0;">PvP Stars — Mini App</h2>
+    <div class="muted" id="tginfo">Загрузка Telegram WebApp...</div>
+  </div>
+
+  <div class="card">
+    <b>Профиль</b>
+    <div class="muted" id="profile">Нет данных</div>
+    <button class="btn" onclick="openBotMenu()">Открыть меню бота</button>
+  </div>
+
+  <div class="card">
+    <b>Игры</b>
+    <div class="muted">Скоро: Duel / Raid / Clan Wars / Market</div>
+    <div class="row">
+      <button class="btn" onclick="sendCmd('menu_duel')">Дуэль</button>
+      <button class="btn" onclick="sendCmd('menu_profile')">Профиль</button>
+    </div>
+    <button class="btn" onclick="sendCmd('menu_clans')">Кланы</button>
+  </div>
+
+  <div class="card">
+    <b>Быстрое действие</b>
+    <div class="muted">Можно отправлять команды в бота из Mini App.</div>
+    <input id="cmd" placeholder="Например: /menu" />
+    <button class="btn" onclick="sendText()">Отправить</button>
+  </div>
+
+<script>
+  const tg = window.Telegram?.WebApp;
+
+  function init(){
+    if(!tg){
+      document.getElementById('tginfo').innerText = "Открой через Telegram → Mini App";
+      return;
+    }
+    tg.ready();
+    tg.expand();
+
+    const u = tg.initDataUnsafe?.user;
+    if(u){
+      document.getElementById('tginfo').innerText = `✅ Telegram подключен: @${u.username || "no_username"}`;
+      document.getElementById('profile').innerText =
+        `ID: ${u.id} | Имя: ${u.first_name || ""} ${u.last_name || ""}`;
+    } else {
+      document.getElementById('tginfo').innerText = "✅ Telegram подключен";
+    }
+  }
+
+  function openBotMenu(){
+    // Просто закрываем Mini App, чтобы человек вернулся в чат
+    if(tg) tg.close();
+  }
+
+  function sendCmd(cmd){
+    // Это отправит данные в бота, если ты в будущем добавишь обработчик WebAppData
+    if(!tg){
+      alert("Открой через Telegram");
+      return;
+    }
+    tg.sendData(JSON.stringify({type:"cmd", value: cmd}));
+    alert("Команда отправлена в бота: " + cmd);
+  }
+
+  function sendText(){
+    const v = document.getElementById('cmd').value.trim();
+    if(!v) return;
+    sendCmd(v);
+  }
+
+  init();
+</script>
+</body>
+</html>
